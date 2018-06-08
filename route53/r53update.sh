@@ -1,4 +1,6 @@
 #!/bin/bash
+
+# Update script also on main repo : https://github.com/D4UDigitalPlatform/cloudscripts/tree/master/awsscripts
 function print_help()
 {
 echo "r53update
