@@ -1,6 +1,4 @@
 #!/bin/bash
-
-# Update script also on main repo : https://github.com/D4UDigitalPlatform/cloudscripts/tree/master/awsscripts
 function print_help()
 {
 echo "r53update
@@ -9,7 +7,9 @@ Use to set dynamically a Route53 DNS record to the public hostname of the runnin
 usage: r53update <options>
 Options:
 -name <dns record>  DNS record to update
+-name-from-tag <tag> DNS record will come from the <tag> value of the EC2
 -ttl <value>        TTL to update (default : 60s)
+-profile <aws cli profile>
 
 example :
 r53update -name myhostname.project.domain.com -ttl 300
@@ -32,6 +32,11 @@ Warning : if using EC2 User Data , you must add in the User Data text area
 before
 #!/bin/sh
 or the user data scripts will not be executed
+
+The IAM role executing this script must have the following ressource policy :
+  route53:ListHostedZones
+  route53:ChangeResourceRecordSets
+  ec2:DescribeTags
 "
 }
 
@@ -48,6 +53,7 @@ fi
 
 DNSNAME=""
 DNSTTL=60
+TAG=""
 CURLOPT="--fail --max-time 1"
 
 #start processing command line arguments
@@ -61,13 +67,34 @@ while [ "$1" != "" ]; do
 		DNSNAME=$2
 		shift
 		;;
+	-name-from-tag)
+		TAG=$2
+		shift
+		;;
 	-ttl)
 		DNSTTL=$2
+		shift
+		;;
+	-profile)
+		AWS_PROFILE=$2
 		shift
 		;;
 	esac
 	shift
 done
+
+if [[ "$TAG" != "" ]]; then
+	#// Read the dns name from the EC2 TAGs list
+	echo "Search for DNS name in tag \"$TAG\""
+	MY_INSTANCEID=$(curl -s $CURLOPT http://instance-data/latest/meta-data/instance-id || curl -s $CURLOPT http://169.254.169.254/latest/meta-data/instance-id)
+	echo "  The instance_id is $MY_INSTANCEID"
+	export AVAILABILITY_ZONE=`wget -qO- http://instance-data/latest/meta-data/placement/availability-zone`
+	export REGION_ID=${AVAILABILITY_ZONE:0:${#AVAILABILITY_ZONE} - 1}
+	echo "  The region is $REGION_ID"
+	CMD=$(aws ec2 describe-tags --region $REGION_ID --filters "Name=resource-id,Values=$MY_INSTANCEID" --query "Tags[?Key=='$TAG'].Value" --output text)
+	DNSNAME=($CMD)
+	echo "  The DNS name associated to this tag is $DNSNAME"
+fi
 
 if [ "$DNSNAME" == "" ]; then
 	echo "Error : missing -name <dns record> parameters" >&2
