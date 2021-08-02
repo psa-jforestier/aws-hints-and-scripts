@@ -1,0 +1,24 @@
+{
+   "s3bucket":"awsmpsaemail",
+   "s3prefix" : "slack-bot@yourdomain.com/",
+   "Slack":{
+      "ses-email-recipient@domain.com":{
+         "comment":"a comment",
+         "webhook":"https://hooks.slack.com/services/xxx/B01Q8NHU3HT/O9WR0hDMKaA0Yo6K3L7YyNEQ",
+         "prefix":"[[",
+         "sufix":"]]"
+      },
+      "johndoe@example.com" : {
+        "comment" : "Sample messqage used with test event",
+        "webhook" : "https://hooks.slack.com/services/xxx/B01Q8NHU3HT/O9WR0hDMKaA0Yo6K3L7YyNEQ",
+        "prefix" : "[[",
+        "sufix" : "]]"
+      },
+      "slack-bot+SLPGA-AKAMAI@awsmpsa.com":{
+         "comment":"Use-case from the real life : forwatd AKAMAI alert mail to the Slack channel of the Ops team",
+         "webhook":"https://hooks.slack.com/services/xxx/B01Q8NHU3HT/O9WR0hDMKaA0Yo6K3L7YyNEQ",
+         "prefix":"[[",
+         "sufix":"]]"
+      }
+   }
+}
