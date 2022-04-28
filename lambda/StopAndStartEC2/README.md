@@ -108,7 +108,6 @@ Also, add a Trust relation with the SECU account :
 
 - Edit the `lambda_function.py` code and modify the `MASTER_ACCOUNT` value with the Id of the MASTER account (the one who defined the organization)
 
-
 /!\ This lambda will call itself asynchronously for each account of the organization
 
 ## Env Var :
@@ -127,4 +126,12 @@ Some example of the "openinghours" tag :
 - `Mon:8-;Fri:-20;TZ:Europe/Paris` : start instance on Monday at 8, stop it on Friday at 20, with Europe/Paris time zone
 - `Mon:8-9;Mon:20-21;TZ:UTC` : start instance on monday from 8 to 9 and 20 to 21 UTC
 
+# Set up the scheduling
 
+- On the region on which you install the Lambda, create an Event Bridge event to trigger the Lambda at scheduled time.
+- Plan the event to be triggered at every hour :
+```
+    Description: Every hour, call the Lambda function
+    Event bus: default
+    Schedule expression: cron(0 * * * ? *)
+```
